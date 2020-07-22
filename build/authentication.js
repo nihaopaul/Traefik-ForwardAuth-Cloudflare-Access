@@ -1,6 +1,6 @@
 const jws = require("jws");
 const axios = require("axios");
-const { DOMAIN, CERT_URL, AUD } = require('./config')
+const { CERT_URL, AUD } = require('./config')
 
 class Validate {
   constructor() {
@@ -42,8 +42,10 @@ class Validate {
   }
 
   async getCertificate(certificateid) {
-    let { public_cert } = await this.certificates;
-    if (public_cert.kid != certificateid) throw Error("Certificate not found");
+    let { public_certs } = await this.certificates;
+    const public_cert = public_certs.find(cert => cert.kid == certificateid)
+
+    if (!public_cert) throw Error("Certificate not found");
     return public_cert.cert;
   }
 

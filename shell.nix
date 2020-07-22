@@ -15,6 +15,7 @@ in stdenv.mkDerivation {
     nodejs-12_x 
     # utilities
     nodePackages.yarn
+    nodePackages.nodemon
     
   ] ++ stdenv.lib.optional stdenv.isDarwin [ pkgs.darwin.apple_sdk.frameworks.CoreServices ];
 
