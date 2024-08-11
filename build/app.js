@@ -1,10 +1,12 @@
-var express = require('express');
+import express from "express";
 
-var cookieParser = require('cookie-parser');
-var auth = require('./routes/auth');
+import cookieParser from "cookie-parser";
+import auth from "./routes/auth.js";
 
-var app = express();
-app.use(cookieParser())
-app.use('/auth', auth);
+const app = express();
 
-module.exports = app;
+app.use(cookieParser());
+app.use("/auth", auth);
+app.listen(process.env.PORT || 3000);
+
+export default app;

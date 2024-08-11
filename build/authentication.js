@@ -1,14 +1,17 @@
-const jws = require("jws");
-const axios = require("axios");
-const { CERT_URL, AUD } = require("./config");
+import jws from "jws";
+import DynamicConfigManager from "./dynamic-config.js";
 
 class Validate {
+  API = null;
   timer = null;
   constructor() {
+    if (!process.env.CF_DOMAIN) throw Error("Domain is required");
+    this.API = `${process.env.CF_DOMAIN}/cdn-cgi/access/certs`;
+
     this.certificates = this.fetchCertificates();
     this.timer = setInterval(
       () => this.expireAndFetchCertificates(),
-      1000 * 60 * 60 * 24
+      1000 * 60 * 60 * 24 // 24 hours
     );
   }
 
@@ -18,20 +21,13 @@ class Validate {
   }
 
   async fetchCertificates() {
-    return await axios
-      .get(CERT_URL)
-      .then(({ data }) => {
-        return data;
-      })
-      .catch(({ errno }) => {
-        switch (errno) {
-          case "ENOTFOUND":
-            console.log("Address incorrect:", CERT_URL);
-            break;
-          default:
-            console.log("err", errno);
-        }
-      });
+    const response = await fetch(this.API);
+    if (!response.ok) {
+      throw new Error("Failed to fetch certificates");
+    }
+    return response.json().then((certificates) => {
+      return certificates;
+    });
   }
 
   async decode(jwt) {
@@ -46,7 +42,9 @@ class Validate {
   }
 
   async validateAUD(aud) {
-    let isValid = aud.find((item) => AUD.includes(item)) ? true : false;
+    let isValid = aud.find((item) => DynamicConfigManager.AUD.includes(item))
+      ? true
+      : false;
     if (!isValid) throw Error("No AUD match");
     return true;
   }
@@ -78,4 +76,4 @@ class Validate {
   }
 }
 
-module.exports = new Validate();
+export default new Validate();
