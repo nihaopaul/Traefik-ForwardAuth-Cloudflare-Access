@@ -1,10 +1,20 @@
 const jws = require("jws");
 const axios = require("axios");
-const { CERT_URL, AUD } = require('./config')
+const { CERT_URL, AUD } = require("./config");
 
 class Validate {
+  timer = null;
   constructor() {
     this.certificates = this.fetchCertificates();
+    this.timer = setInterval(
+      () => this.expireAndFetchCertificates(),
+      1000 * 60 * 60 * 24
+    );
+  }
+
+  async expireAndFetchCertificates() {
+    console.log("Certificates expired, fetching new ones");
+    this.certificates = await this.fetchCertificates();
   }
 
   async fetchCertificates() {
@@ -43,7 +53,7 @@ class Validate {
 
   async getCertificate(certificateid) {
     let { public_certs } = await this.certificates;
-    const public_cert = public_certs.find(cert => cert.kid == certificateid)
+    const public_cert = public_certs.find((cert) => cert.kid == certificateid);
 
     if (!public_cert) throw Error("Certificate not found");
     return public_cert.cert;
