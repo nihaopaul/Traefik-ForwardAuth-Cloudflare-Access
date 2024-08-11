@@ -1,10 +1,8 @@
 name: Docker Image CI
 
 on:
-  # release:
-  #   types: [published]
-  push:
-    branches: ["master"]
+  release:
+    types: [published]
 
 jobs:
   docker:
@@ -19,9 +17,6 @@ jobs:
         with:
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_TOKEN}}
-
-      # - name: Build the Docker image
-      #   run: docker build . --file Dockerfile --tag traefik-forwardauth-cloudflare-access:$(date +%s)
 
       - name: build and push docker image to registry
         uses: docker/build-push-action@v5
