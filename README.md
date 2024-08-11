@@ -1,24 +1,45 @@
-The following is a ForwardAuth service for Traefik 2.x working with Cloudflare Access, caching the certifcates from Cloudflare, validating JWT headers and also validating the Audience ID (AUD), its serves as a PoC 
+This document serves as a guide for a Proof of Concept (POC) aimed at validating Cloudflare Zero Trust forwards using Traefik's forward-auth service. The nodeJS service is compatible with both Traefik 2.x and Traefik 3.x versions. 
 
-```servicename.toml
+The primary goal is to demonstrate how to authenticate Traefik requests through Cloudflare Zero Trust, ensuring secure access control.
 
-[http.routers]
-  [http.routers.servicename]
-    ...
-    rule = "Host(`some.domain.name`) && PathPrefix(`/servicename`)" <-- this needs to match your setup in cloudflare Access
-    ...
-    middlewares = ["auth"]
+Additionally most configurations have moved to environmental variables which allow you to dockerise it, and since AUDs will come and go along with certificates the certficates refresh every 24hours while the auds refresh every hour using cloudflare APIS.
 
-  [http.routers.servicename.tls]
-    ...
+```
+// setup a read only API token with permission: Account > Access: apps and policies > Read
 
-  [http.middlewares.auth.forwardAuth]
-    address = "http://[nodejs.server.address]:[port]/auth"
+CF_TOKEN=_this is your cf token_ 
+
+// take from the cloudflare dashboard url https://dash.cloudflare.com/{your ORG ID}
+
+CF_ORG=_this is your ID for cloudflare_ 
+
+// what you have configured in cloudflare zero trust: team domain
+
+CF_DOMAIN=https://{yourdomain}.cloudflareaccess.com 
+```
 
 
-[http.services]
-  [[http.services.servicename.loadBalancer.servers]]
-    ...
+traefik config such as auth.yml
 
+```YAML
+http:
+  middlewares:
+    test-auth:
+      forwardAuth:
+        address: "http://IP:PORT/auth"
+```
+
+then under the domain specify the provider, you probably dont want to do this on a writable dashboard or API.
+
+```YAML
+http:
+  routers:
+    dashboard:
+      rule: Host(`{your domain}`)
+      service: api@internal
+      middlewares:
+        - test-auth
+      entryPoints:
+        - "websecure"
 
 ```
