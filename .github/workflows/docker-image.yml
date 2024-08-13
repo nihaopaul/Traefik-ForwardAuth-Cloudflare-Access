@@ -26,8 +26,8 @@ jobs:
       - name: build and push docker image to registry
         uses: docker/build-push-action@v5
         with:
-          context: .
-          push: true
+          # context: .
+          # push: true
           tags: ${{ steps.meta.outputs.tags }}
           annotations: ${{ steps.meta.outputs.annotations }}
           # tags: nihaopaul/forward-auth:latest
