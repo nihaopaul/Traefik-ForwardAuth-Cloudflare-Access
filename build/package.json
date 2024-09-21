@@ -10,7 +10,7 @@
   "dependencies": {
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
-    "express": "~4.19.2",
+    "express": "~4.20.0",
     "jws": "^4.0.0"
   }
 }
