@@ -8,5 +8,6 @@ let
     };
     buildInputs = [
       nodejs-18_x
+      git
     ];
 }
